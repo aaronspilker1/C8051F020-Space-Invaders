@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V6.22.2.0          03/09/2021  21:50:43  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.2.0          03/09/2021  21:56:24  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
@@ -67,7 +67,7 @@ LINK MAP OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space In
             CODE    351CH     01EEH     UNIT         ?PR?DRAW_STRINGS?INVADERS
 >> 
             CODE    370AH     01B7H     UNIT         ?PR?CALCULATE_SHOTS_POSIT
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 2
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 2
 
 
 >> ION?INVADERS
@@ -94,13 +94,13 @@ LINK MAP OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space In
             CODE    44F7H     0059H     UNIT         ?PR?TIMER1?INVADERS
             CODE    4550H     0056H     UNIT         ?PR?TIMER0?INVADERS
             CODE    45A6H     004DH     UNIT         ?PR?RAND?RAND
-            CODE    45F3H     0040H     UNIT         ?PR?TIMER2?INVADERS
-            CODE    4633H     0032H     UNIT         ?CO?GRAPHICS
-            CODE    4665H     002FH     UNIT         ?CO?INVADERS
-            CODE    4694H     001AH     UNIT         ?PR?CHECK_BUTTONS?INVADER
+            CODE    45F3H     0048H     UNIT         ?CO?GRAPHICS
+            CODE    463BH     0040H     UNIT         ?PR?TIMER2?INVADERS
+            CODE    467BH     002FH     UNIT         ?CO?INVADERS
+            CODE    46AAH     001AH     UNIT         ?PR?CHECK_BUTTONS?INVADER
 >> S
-            CODE    46AEH     0015H     UNIT         ?PR?_STRLEN?STRLEN
-            CODE    46C3H     0013H     UNIT         ?PR?CHECK_START_GAME?INVA
+            CODE    46C4H     0015H     UNIT         ?PR?_STRLEN?STRLEN
+            CODE    46D9H     0013H     UNIT         ?PR?CHECK_START_GAME?INVA
 >> DERS
 
 
@@ -131,12 +131,15 @@ SEGMENT                                         DATA_GROUP
 ?PR?DRAW_SHIPS?INVADERS                       0008H    0004H
   +--> ?CO?GRAPHICS
 
+?PR?DRAW_CANNON?INVADERS                      -----    -----
+  +--> ?CO?GRAPHICS
+
 ?PR?DRAW_SHOTS?INVADERS                       0008H    0003H
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 3
+
+
 
 *** NEW ROOT ***************************************************
-
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 3
-
 
 ?PR?TIMER1?INVADERS                           -----    -----
   +--> ?PR?CHECK_CANNON_FIRED?INVADERS
@@ -187,11 +190,6 @@ SEGMENT                                         DATA_GROUP
 
 
 
-UNRESOLVED EXTERNAL SYMBOLS:
-   CANNON_GFX
-
-
-
 SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
 >> e Invaders App\Invaders (GRAPHICS)
 
@@ -200,17 +198,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
 
   -------         MODULE        GRAPHICS
   C:0000H         SYMBOL        _ICE_DUMMY_
-  C:464DH         PUBLIC        cannon_gfx11
-  C:4658H         PUBLIC        cannon_gfx13
-  C:4633H         PUBLIC        ship_gfx
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 4
-
-
-  C:463DH         PUBLIC        cannon_gfx7
-  C:4644H         PUBLIC        cannon_gfx9
+  C:4607H         PUBLIC        cannon_gfx
+  C:45F3H         PUBLIC        ship_gfx
   -------         ENDMOD        GRAPHICS
 
   -------         MODULE        INVADERS
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 4
+
+
   C:0000H         SYMBOL        _ICE_DUMMY_
   D:001FH         PUBLIC        switch_current
   X:0400H         PUBLIC        ship_x_coord_limits
@@ -224,7 +219,7 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:00E8H         PUBLIC        ADC0CN
   D:00D4H         PUBLIC        DAC0CN
   D:00A8H         PUBLIC        IE
-  C:46C3H         PUBLIC        check_start_game
+  C:46D9H         PUBLIC        check_start_game
   X:0404H         PUBLIC        cannon_shot_coords
   C:449AH         PUBLIC        draw_cannon
   D:00D8H         PUBLIC        PCA0CN
@@ -271,16 +266,16 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:00CDH         PUBLIC        TH2
   C:3E3EH         PUBLIC        initialize_wave
   C:4438H         PUBLIC        check_cannon_fired
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 5
-
-
   D:00B1H         PUBLIC        OSCXCN
   D:008AH         PUBLIC        TL0
   D:008BH         PUBLIC        TL1
   D:00CCH         PUBLIC        TL2
   C:4550H         PUBLIC        timer0
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 5
+
+
   C:44F7H         PUBLIC        timer1
-  C:45F3H         PUBLIC        timer2
+  C:463BH         PUBLIC        timer2
   B:0088H.4       PUBLIC        TR0
   X:0439H         PUBLIC        ship_frame_num
   B:0088H.6       PUBLIC        TR1
@@ -296,9 +291,9 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:0098H         PUBLIC        SCON0
   D:002FH         PUBLIC        wave_num
   D:00C8H         PUBLIC        T2CON
-  C:4670H         PUBLIC        intro_str
-  C:4694H         PUBLIC        check_buttons
-  C:4665H         PUBLIC        game_over_str
+  C:4686H         PUBLIC        intro_str
+  C:46AAH         PUBLIC        check_buttons
+  C:467BH         PUBLIC        game_over_str
   D:0030H         PUBLIC        game_is_over
   D:00D0H         PUBLIC        PSW
   C:411DH         PUBLIC        get_adc0_value
@@ -339,14 +334,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3670H         LINE#         75
   C:367FH         LINE#         76
   C:368FH         LINE#         77
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 6
-
-
   C:368FH         LINE#         78
   C:3695H         LINE#         79
   C:369AH         LINE#         80
   C:369AH         LINE#         81
   C:36D2H         LINE#         82
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 6
+
+
   C:36DAH         LINE#         83
   C:36E8H         LINE#         84
   C:36F6H         LINE#         85
@@ -407,14 +402,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3AACH         LINE#         138
   C:3AAFH         LINE#         141
   C:3ABBH         LINE#         142
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 7
-
-
   C:3ABBH         LINE#         143
   C:3AD9H         LINE#         144
   C:3AD9H         LINE#         145
   C:3AE7H         LINE#         146
   C:3AE7H         LINE#         148
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 7
+
+
   C:3AE7H         LINE#         149
   C:3AE7H         LINE#         150
   C:3AE7H         LINE#         151
@@ -475,14 +470,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3F5BH         LINE#         210
   C:3F68H         LINE#         211
   C:3F68H         LINE#         213
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 8
-
-
   C:3F8CH         LINE#         214
   C:3F9BH         LINE#         215
   C:3F9BH         LINE#         217
   C:3FC6H         LINE#         218
   C:3FC6H         LINE#         219
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 8
+
+
   C:3FCDH         LINE#         220
   C:3FCFH         LINE#         221
   C:3FCFH         LINE#         223
@@ -543,14 +538,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:380BH         LINE#         280
   C:3817H         LINE#         281
   C:381DH         LINE#         282
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 9
-
-
   C:381DH         LINE#         283
   C:3829H         LINE#         284
   C:382CH         LINE#         285
   C:3831H         LINE#         286
   C:3839H         LINE#         287
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 9
+
+
   C:3854H         LINE#         288
   C:3854H         LINE#         290
   C:3862H         LINE#         291
@@ -611,14 +606,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   -------         PROC          L?0252
   -------         ENDPROC       L?0252
   -------         PROC          INITIALIZE_WAVE
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 10
-
-
   -------         DO            
   D:0007H         SYMBOL        i
   D:0006H         SYMBOL        j
   -------         ENDDO         
   C:3E3EH         LINE#         354
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 10
+
+
   C:3E3EH         LINE#         355
   C:3E3EH         LINE#         356
   C:3E40H         LINE#         357
@@ -650,18 +645,18 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3F3CH         LINE#         386
   -------         ENDPROC       INITIALIZE_WAVE
   -------         PROC          CHECK_START_GAME
-  C:46C3H         LINE#         389
-  C:46C3H         LINE#         390
-  C:46C3H         LINE#         391
-  C:46C8H         LINE#         392
-  C:46C8H         LINE#         394
-  C:46CBH         LINE#         397
-  C:46CFH         LINE#         398
-  C:46CFH         LINE#         399
-  C:46D2H         LINE#         400
-  C:46D5H         LINE#         401
-  C:46D5H         LINE#         402
-  C:46D5H         LINE#         403
+  C:46D9H         LINE#         389
+  C:46D9H         LINE#         390
+  C:46D9H         LINE#         391
+  C:46DEH         LINE#         392
+  C:46DEH         LINE#         394
+  C:46E1H         LINE#         397
+  C:46E5H         LINE#         398
+  C:46E5H         LINE#         399
+  C:46E8H         LINE#         400
+  C:46EBH         LINE#         401
+  C:46EBH         LINE#         402
+  C:46EBH         LINE#         403
   -------         ENDPROC       CHECK_START_GAME
   -------         PROC          CHECK_CANNON_FIRED
   -------         DO            
@@ -679,14 +674,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:446EH         LINE#         419
   C:446EH         LINE#         421
   C:4471H         LINE#         423
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 11
-
-
   C:4486H         LINE#         424
   C:4495H         LINE#         425
   C:4496H         LINE#         426
   C:4496H         LINE#         427
   C:4499H         LINE#         428
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 11
+
+
   C:4499H         LINE#         429
   -------         ENDPROC       CHECK_CANNON_FIRED
   -------         PROC          CALCULATE_HIT
@@ -747,14 +742,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3266H         LINE#         492
   C:3266H         LINE#         493
   C:3268H         LINE#         494
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 12
-
-
   C:3277H         LINE#         496
   C:32A8H         LINE#         497
   C:32A8H         LINE#         500
   C:32A8H         LINE#         502
   C:32A8H         LINE#         503
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 12
+
+
   C:32A8H         LINE#         504
   C:32ABH         LINE#         505
   C:32ABH         LINE#         506
@@ -815,14 +810,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:42D5H         LINE#         558
   C:42DAH         LINE#         559
   C:42DAH         LINE#         560
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 13
-
-
   C:42DDH         LINE#         561
   C:42DDH         LINE#         564
   C:42E9H         LINE#         565
   C:42F8H         LINE#         566
   C:42FDH         LINE#         568
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 13
+
+
   C:4322H         LINE#         569
   C:4322H         LINE#         571
   C:4322H         LINE#         573
@@ -883,14 +878,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:0002H         SYMBOL        i
   D:0016H         SYMBOL        position_sum
   -------         ENDDO         
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 14
-
-
   C:411DH         LINE#         629
   C:411DH         LINE#         630
   C:411DH         LINE#         631
   C:4122H         LINE#         632
   C:4124H         LINE#         633
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 14
+
+
   C:412CH         LINE#         636
   C:412FH         LINE#         637
   C:4131H         LINE#         638
@@ -916,17 +911,17 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   -------         DO            
   D:0007H         SYMBOL        button_state
   -------         ENDDO         
-  C:4694H         LINE#         662
-  C:4694H         LINE#         663
-  C:4694H         LINE#         664
-  C:4694H         LINE#         667
-  C:4698H         LINE#         668
-  C:469BH         LINE#         669
-  C:46A0H         LINE#         670
-  C:46A3H         LINE#         671
-  C:46A5H         LINE#         674
-  C:46AAH         LINE#         675
-  C:46ADH         LINE#         676
+  C:46AAH         LINE#         662
+  C:46AAH         LINE#         663
+  C:46AAH         LINE#         664
+  C:46AAH         LINE#         667
+  C:46AEH         LINE#         668
+  C:46B1H         LINE#         669
+  C:46B6H         LINE#         670
+  C:46B9H         LINE#         671
+  C:46BBH         LINE#         674
+  C:46C0H         LINE#         675
+  C:46C3H         LINE#         676
   -------         ENDPROC       CHECK_BUTTONS
   -------         PROC          TIMER0
   C:4550H         LINE#         679
@@ -951,14 +946,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:451AH         LINE#         708
   C:451AH         LINE#         709
   C:451DH         LINE#         710
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 15
-
-
   C:451FH         LINE#         711
   C:4526H         LINE#         712
   C:4526H         LINE#         713
   C:4529H         LINE#         714
   C:452CH         LINE#         715
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 15
+
+
   C:452CH         LINE#         716
   C:452FH         LINE#         717
   C:4532H         LINE#         718
@@ -966,11 +961,11 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:4535H         LINE#         720
   -------         ENDPROC       TIMER1
   -------         PROC          TIMER2
-  C:45F3H         LINE#         723
-  C:4610H         LINE#         725
-  C:4612H         LINE#         727
-  C:4615H         LINE#         728
-  C:4618H         LINE#         729
+  C:463BH         LINE#         723
+  C:4658H         LINE#         725
+  C:465AH         LINE#         727
+  C:465DH         LINE#         728
+  C:4660H         LINE#         729
   -------         ENDPROC       TIMER2
   -------         PROC          MAIN
   -------         DO            
@@ -1019,14 +1014,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:3D85H         LINE#         777
   C:3D88H         LINE#         778
   C:3D8BH         LINE#         779
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 16
-
-
   C:3D8FH         LINE#         782
   C:3D95H         LINE#         783
   C:3DA8H         LINE#         784
   C:3DA8H         LINE#         785
   C:3DB0H         LINE#         786
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 16
+
+
   C:3DB9H         LINE#         787
   C:3DB9H         LINE#         788
   C:3DBFH         LINE#         789
@@ -1087,14 +1082,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   B:00D8H.0       SYMBOL        CCF0
   B:00D8H.1       SYMBOL        CCF1
   B:00D8H.2       SYMBOL        CCF2
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 17
-
-
   B:00D8H.3       SYMBOL        CCF3
   B:00D8H.4       SYMBOL        CCF4
   B:00D8H.7       SYMBOL        CF
   D:008EH         SYMBOL        CKCON
   B:00C8H.0       SYMBOL        CPRL2
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 17
+
+
   D:009EH         SYMBOL        CPT0CN
   D:009FH         SYMBOL        CPT1CN
   B:00D8H.6       SYMBOL        CR
@@ -1155,14 +1150,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:00ADH         SYMBOL        P3IF
   D:00A7H         SYMBOL        P3MDOUT
   D:0084H         SYMBOL        P4
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 18
-
-
   D:0085H         SYMBOL        P5
   D:0086H         SYMBOL        P6
   D:0096H         SYMBOL        P7
   D:00B5H         SYMBOL        P74OUT
   C:3312H         SYMBOL        PAGE_LOOP
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 18
+
+
   D:00D8H         SYMBOL        PCA0CN
   D:00FAH         SYMBOL        PCA0CPH0
   D:00FBH         SYMBOL        PCA0CPH1
@@ -1223,14 +1218,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   D:00C2H         SYMBOL        SMB0DAT
   D:00C1H         SYMBOL        SMB0STA
   B:00C0H.1       SYMBOL        SMBFTE
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 19
-
-
   B:00C0H.0       SYMBOL        SMBTOE
   D:0081H         SYMBOL        SP
   D:009AH         SYMBOL        SPI0CFG
   D:009DH         SYMBOL        SPI0CKR
   D:00F8H         SYMBOL        SPI0CN
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 19
+
+
   D:009BH         SYMBOL        SPI0DAT
   B:00F8H.0       SYMBOL        SPIEN
   B:00F8H.7       SYMBOL        SPIF
@@ -1291,14 +1286,14 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   C:32C6H         LINE#         50
   C:32C7H         LINE#         51
   C:32C8H         LINE#         52
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 20
-
-
   C:32C9H         LINE#         60
   C:32CCH         LINE#         61
   C:32CFH         LINE#         62
   C:32D2H         LINE#         63
   C:32D5H         LINE#         64
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 20
+
+
   C:32D8H         LINE#         66
   C:32DAH         LINE#         67
   C:32DDH         LINE#         68
@@ -1359,13 +1354,13 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   -------         MODULE        ?C?UIDIV
   C:38E3H         PUBLIC        ?C?UIDIV
   -------         ENDMOD        ?C?UIDIV
-BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:50:43  PAGE 21
-
-
 
   -------         MODULE        ?C?SIDIV
   C:3938H         PUBLIC        ?C?SIDIV
   -------         ENDMOD        ?C?SIDIV
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0        03/09/2021  21:56:24  PAGE 21
+
 
   -------         MODULE        ?C?ULDIV
   C:39AAH         PUBLIC        ?C?ULDIV
@@ -1382,29 +1377,12 @@ SYMBOL TABLE OF MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Spac
   -------         ENDMOD        RAND
 
   -------         MODULE        STRLEN
-  C:46AEH         PUBLIC        _STRLEN
+  C:46C4H         PUBLIC        _STRLEN
   -------         ENDMOD        STRLEN
 
   -------         MODULE        ?C?CLDPTR
   C:3A4DH         PUBLIC        ?C?CLDPTR
   -------         ENDMOD        ?C?CLDPTR
 
-*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
-    SYMBOL:  CANNON_GFX
-    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders A
->> pp\invaders.obj (INVADERS)
-
-*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
-    SYMBOL:  CANNON_GFX
-    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders A
->> pp\invaders.obj (INVADERS)
-    ADDRESS: 44C8H
-
-*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
-    SYMBOL:  CANNON_GFX
-    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders A
->> pp\invaders.obj (INVADERS)
-    ADDRESS: 44CDH
-
-Program Size: data=56.0 xdata=1169 code=18100
-LINK/LOCATE RUN COMPLETE.  3 WARNING(S),  0 ERROR(S)
+Program Size: data=56.0 xdata=1169 code=18122
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

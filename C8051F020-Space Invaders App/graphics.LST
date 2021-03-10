@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   GRAPHICS                                                          03/09/2021 21:45:24 PAGE 1   
+C51 COMPILER V9.59.0.0   GRAPHICS                                                          03/09/2021 21:56:24 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE GRAPHICS
@@ -9,32 +9,35 @@ line level    source
 
    1          
    2          // this file contains data needed for drawing the ships and cannon
-   3          // TODO change cannon to 13x4 array for cleaner code in program
-   4          
-   5          code unsigned char     ship_gfx[10] = {0x20, 0x11, 0x1E, 0x2A,
-   6                                                 0x0E, 0x0E, 0x2A, 0x1E,
-   7                                                 0x11, 0x20};
-   8          
-   9          code unsigned char   cannon_gfx7[7] = {0x70, 0x78, 0x7E, 0x7E, 
-  10                                                 0x7E, 0x78, 0x70};
-  11          
-  12          code unsigned char   cannon_gfx9[9] = {0x70, 0x70, 0x78, 0x7E,
-  13                                                 0x7E, 0x7E, 0x78, 0x70,
-  14                                                 0x70};
-  15          
-  16          code unsigned char cannon_gfx11[11] = {0x70, 0x70, 0x70, 0x78,
-  17                                                 0x7E, 0x7E, 0x7E, 0x78,
-  18                                                 0x70, 0x70, 0x70};
-  19          
-  20          code unsigned char cannon_gfx13[13] = {0x70, 0x70, 0x70, 0x70,
-  21                                                 0x78, 0x7E, 0x7E, 0x7E,
-  22                                                 0x78, 0x70, 0x70, 0x70,
-  23                                                 0x70};
+   3          
+   4          code unsigned char   ship_gfx[2][10] = {0x01, 0x22, 0x1E, 0x15,
+   5                                                  0x1C, 0x1C, 0x15, 0x1E,
+   6                                                  0x22, 0x01,
+   7                                                  0x08, 0x24, 0x1E, 0x16,
+   8                                                  0x1C, 0x1C, 0x16, 0x1E,
+   9                                                  0x24, 0x08};
+  10          
+  11          code unsigned char cannon_gfx[4][13] = {0x70, 0x78, 0x7E, 0x7E, 
+  12                                                  0x7E, 0x78, 0x70, 0x00,
+  13                                                  0x00, 0x00, 0x00, 0x00,
+  14                                                  0x00,
+  15                                                  0x70, 0x70, 0x78, 0x7E,
+  16                                                  0x7E, 0x7E, 0x78, 0x70,
+  17                                                  0x70, 0x00, 0x00, 0x00,
+  18                                                  0x00,
+  19                                                  0x70, 0x70, 0x70, 0x78,
+  20                                                  0x7E, 0x7E, 0x7E, 0x78,
+  21                                                  0x70, 0x70, 0x70, 0x00,
+  22                                                  0x00,
+  23                                                  0x70, 0x70, 0x70, 0x70,
+  24                                                  0x78, 0x7E, 0x7E, 0x7E,
+  25                                                  0x78, 0x70, 0x70, 0x70,
+  26                                                  0x70};
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   ----    ----
-   CONSTANT SIZE    =     50    ----
+   CONSTANT SIZE    =     72    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----

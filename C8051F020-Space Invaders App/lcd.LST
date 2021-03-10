@@ -1,4 +1,4 @@
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     1
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     1
 
 
 MACRO ASSEMBLER A51 V8.2.7.0
@@ -65,7 +65,7 @@ LOC  OBJ            LINE     SOURCE
   00A5          +1    56     P1MDOUT  DATA  0A5H   ; PORT 1 OUTPUT MODE CONFIGURATION
   00A6          +1    57     P2MDOUT  DATA  0A6H   ; PORT 2 OUTPUT MODE CONFIGURATION
   00A7          +1    58     P3MDOUT  DATA  0A7H   ; PORT 3 OUTPUT MODE CONFIGURATION
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     2
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     2
 
   00A8          +1    59     IE       DATA  0A8H   ; INTERRUPT ENABLE
   00A9          +1    60     SADDR0   DATA  0A9H   ; SERIAL PORT 0 SLAVE ADDRESS
@@ -133,7 +133,7 @@ LOC  OBJ            LINE     SOURCE
   00EB          +1   122     PCA0CPL1 DATA  0EBH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 1 - LOW BYTE
   00EC          +1   123     PCA0CPL2 DATA  0ECH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 2 - LOW BYTE
   00ED          +1   124     PCA0CPL3 DATA  0EDH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 3 - LOW BYTE
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     3
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     3
 
   00EE          +1   125     PCA0CPL4 DATA  0EEH   ; CAPTURE/COMPARE REGISTER FOR PCA 0 MODULE 4 - LOW BYTE
   00EF          +1   126     RSTSRC   DATA  0EFH   ; RESET SOURCE 
@@ -201,7 +201,7 @@ LOC  OBJ            LINE     SOURCE
   00C3          +1   188     SI       BIT   SMB0CN.3 ; SMBUS 0 INTERRUPT PENDING FLAG
   00C4          +1   189     STO      BIT   SMB0CN.4 ; SMBUS 0 STOP FLAG
   00C5          +1   190     STA      BIT   SMB0CN.5 ; SMBUS 0 START FLAG
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     4
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     4
 
   00C6          +1   191     ENSMB    BIT   SMB0CN.6 ; SMBUS 0 ENABLE 
                 +1   192     ;
@@ -269,7 +269,7 @@ LOC  OBJ            LINE     SOURCE
                      254     ; outputs: none
                      255     ; destroys:
                      256     ;   wcom:   EMI0CN
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     5
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     5
 
                      257     ;   wcom_a: EMI0CN, r0
 0000 F8              258     wcom_a: mov     r0,a            ; save acc in R0 while we check BUSY
@@ -337,7 +337,7 @@ LOC  OBJ            LINE     SOURCE
 0058 120000   F      320             call    wcom
 005B 120000   F      321             call    blank_screen    ; fall through to refresh_screen
                      322     ;
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     6
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     6
 
                      323     ; subroutine refresh_screen
                      324     ;   Copies 1k bytes of data from external address 0 to the LCD. Bytes 0-7F go
@@ -405,7 +405,7 @@ LOC  OBJ            LINE     SOURCE
 00CD 00                      
 00CE 08080808        374       db  008H, 008H, 008H, 008H, 008H ; -
 00D2 08                      
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     7
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     7
 
 00D3 00606000        375       db  000H, 060H, 060H, 000H, 000H ; .
 00D7 00                      
@@ -473,7 +473,7 @@ LOC  OBJ            LINE     SOURCE
 0172 7F                      
 0173 7F020408        407       db  07FH, 002H, 004H, 008H, 07FH ; N
 0177 7F                      
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     8
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     8
 
 0178 3E414141        408       db  03EH, 041H, 041H, 041H, 03EH ; O
 017C 3E                      
@@ -541,7 +541,7 @@ LOC  OBJ            LINE     SOURCE
 0217 00                      
 0218 38444444        440       db  038H, 044H, 044H, 044H, 038H ; o
 021C 38                      
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE     9
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE     9
 
 021D FC444444        441       db  0FCH, 044H, 044H, 044H, 038H ; p
 0221 38                      
@@ -580,7 +580,7 @@ LOC  OBJ            LINE     SOURCE
 0000                 459     screen: ds 1024
                      460     
                      461             end
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE    10
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE    10
 
 XREF SYMBOL TABLE LISTING
 ---- ------ ----- -------
@@ -648,7 +648,7 @@ EMI0CF . . . . . .  D ADDR   00A3H   A      54# 296
 EMI0CN . . . . . .  D ADDR   00AFH   A      66# 259 281 284
 EMI0TC . . . . . .  D ADDR   00A1H   A      53# 297
 ENSMB. . . . . . .  B ADDR   00C0H.6 A      191#
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE    11
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE    11
 
 ES . . . . . . . .  B ADDR   00A8H.4 A      172#
 ET0. . . . . . . .  B ADDR   00A8H.1 A      169#
@@ -716,7 +716,7 @@ PCA0L. . . . . . .  D ADDR   00E9H   A      120#
 PCA0MD . . . . . .  D ADDR   00D9H   A      105#
 PCON . . . . . . .  D ADDR   0087H   A      28#
 PS . . . . . . . .  B ADDR   00B8H.4 A      181#
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE    12
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE    12
 
 PSCTL. . . . . . .  D ADDR   008FH   A      36#
 PSW. . . . . . . .  D ADDR   00D0H   A      96# 204 205 206 207 208 209 210 211
@@ -784,7 +784,7 @@ TH4. . . . . . . .  D ADDR   00F5H   A      132#
 TI . . . . . . . .  B ADDR   0098H.1 A      159#
 TL0. . . . . . . .  D ADDR   008AH   A      31#
 TL1. . . . . . . .  D ADDR   008BH   A      32#
-A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:45:24 PAGE    13
+A51 MACRO ASSEMBLER  LCD                                                                  03/09/2021 21:56:24 PAGE    13
 
 TL2. . . . . . . .  D ADDR   00CCH   A      93#
 TL4. . . . . . . .  D ADDR   00F4H   A      131#
