@@ -1,0 +1,866 @@
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE INVADERS
+OBJECT MODULE PLACED IN invaders.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.exe invaders.c DB OE BR INCDIR(c:\SiLabs\MCU\Inc)
+
+line level    source
+
+   1          #include <C8051F020.h>
+   2          #include <string.h>
+   3          #include <stdlib.h>
+   4          #include <lcd.h>
+   5          #include <sound.h>
+   6          #include <graphics.h>
+   7          
+   8          
+   9          xdata char score_str[] = "Score: 0000";
+  10          xdata char lives_str[] = "  Lives: 0";
+  11          xdata char wave_num_str[] = "Wave #00";
+  12          code char game_over_str[] = "GAME OVER!";
+  13          code char intro_str[] = "SPACE INVADERS        (Press Start)";
+  14          xdata unsigned char ship_frame_num = 0; // ship animation frame number
+  15          xdata unsigned char ship_alive[8][2] = {0, 0, 0, 0, 0, 0, 0, 0,
+  16                                                  0, 0, 0, 0, 0, 0, 0, 0}; // ship status, column/row
+  17          xdata int ship_ref_coords[2] = {0, 8}; // ship screen reference coords, x/y, top-left of ship group
+  18          xdata int ship_x_coord_limits[2] = {0, 27}; // ship reference x-coord limits, min/max
+  19          xdata char ship_shot_coords[8][2] = {-1, -1, -1, -1, -1, -1, -1, -1,
+  20                                               -1, -1, -1, -1, -1, -1, -1, -1};
+  21          xdata char cannon_shot_coords[4][2] = {-1, -1, -1, -1,
+  22                                                 -1, -1, -1, -1};
+  23          unsigned int score = 0;
+  24          unsigned char lives = 3;
+  25          unsigned char ship_update_counter = 0;
+  26          unsigned char ship_update_time = 0;
+  27          unsigned char ship_direction = 0;
+  28          unsigned char wave_num = 0;
+  29          unsigned char game_is_over = 0;
+  30          unsigned char cannon_size = 7;
+  31          unsigned int cannon_position_avg = 0;
+  32          xdata unsigned int cannon_position[32] = {0};
+  33          unsigned char cannon_position_index = 0;
+  34          unsigned char sound_to_play = 0;
+  35          unsigned char sound_in_progress = 0;
+  36          unsigned int sound_index = 0;
+  37          unsigned char first_run = 1;
+  38          char button_last = 0;
+  39          char button_current = 0;
+  40          char switch_current = 0;
+  41          sbit adc0int = ADC0CN^5;
+  42          
+  43          
+  44          void draw_strings(void)
+  45          {
+  46   1          int cursor = 0;
+  47   1          int i = 0;
+  48   1          int j = 0;
+  49   1          char cur_char;
+  50   1          
+  51   1          // setup score string with updated values and add to screen data
+  52   1          score_str[7] = ((score % 10000) / 1000) + 0x30; // 1000's digit to char
+  53   1          score_str[8] = ((score % 1000) / 100) + 0x30; // 100's digit to char
+  54   1          score_str[9] = ((score % 100) / 10) + 0x30; // 10's digit to char
+  55   1          score_str[10] = (score % 10) + 0x30; // 1's digit to char
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 2   
+
+  56   1          for (i = 0; i < strlen(score_str); i++) // display score string
+  57   1          {
+  58   2              cur_char = score_str[i];
+  59   2              if (cur_char < 0x20)
+  60   2                  continue; // skip invalid characters
+  61   2                  cur_char -= 0x20; // align ascii value with our font array
+  62   2              for (j = 0; j < 5; j++) // handle each column in character
+  63   2              {
+  64   3                  screen[cursor] = font5x8[cur_char*5+j];
+  65   3                  cursor++;
+  66   3              }
+  67   2              screen[cursor] = 0x00; // kerning gap
+  68   2              cursor++;
+  69   2          }
+  70   1      
+  71   1          // setup lives string with updated values and add to screen data
+  72   1          lives_str[9] = (lives % 10) + 0x30; // 1's digit to char
+  73   1          for (i = 0; i < strlen(lives_str); i++) // display lives string
+  74   1          {
+  75   2              cur_char = lives_str[i];
+  76   2              if (cur_char < 0x20)
+  77   2                  continue; // skip invalid characters
+  78   2                  cur_char -= 0x20; // align ascii value with our font array
+  79   2              for (j = 0; j < 5; j++) // handle each column in character
+  80   2              {
+  81   3                  screen[cursor] = font5x8[cur_char*5+j];
+  82   3                  cursor++;
+  83   3              }
+  84   2              screen[cursor] = 0x00; // kerning gap
+  85   2              cursor++;
+  86   2          }
+  87   1      }
+  88          
+  89          
+  90          void draw_cannon(void)
+  91          {
+  92   1          unsigned char i = 0;
+  93   1          unsigned char cannon_num = switch_current & 0x03; //last two switches
+  94   1      
+  95   1          switch (cannon_num)
+  96   1          {
+  97   2              case 3:
+  98   2                  cannon_size = 13;
+  99   2                  break;
+ 100   2              case 2:
+ 101   2                  cannon_size = 11;
+ 102   2                  break;
+ 103   2              case 1:
+ 104   2                  cannon_size = 9;
+ 105   2                  break;
+ 106   2              case 0:
+ 107   2              default:
+ 108   2                  cannon_size = 7;
+ 109   2                  break;
+ 110   2          }
+ 111   1          // draw cannon
+ 112   1          for (i = 0; i < cannon_size; i++)
+ 113   1              screen[896+cannon_position_avg+i] = cannon_gfx[cannon_num][i]; // 896 = page 7
+ 114   1      }
+ 115          
+ 116          
+ 117          void calculate_ships_position(void)
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 3   
+
+ 118          {
+ 119   1          unsigned char i = 0;
+ 120   1          unsigned char lower_limit = 48;
+ 121   1          unsigned char ship_in_bottom_row = 0;
+ 122   1      
+ 123   1          // reset ship x coord limits before calculations below
+ 124   1          ship_x_coord_limits[0] = 0;
+ 125   1          ship_x_coord_limits[1] = 27;
+ 126   1      
+ 127   1          // set right limit based on how many right columns are gone
+ 128   1          for (i = 7; i >= 0; i--)
+ 129   1          {
+ 130   2              if (!(ship_alive[i][0]) && !(ship_alive[i][1]))
+ 131   2              {
+ 132   3                  ship_x_coord_limits[1] += 13; // make sure we move all the way to the right edge
+ 133   3              }
+ 134   2              else
+ 135   2              {
+ 136   3                  break; // we found a rightmost ship so stop checking
+ 137   3              }
+ 138   2          }
+ 139   1      
+ 140   1          // set left limit based on how many left columns are gone
+ 141   1          for (i = 0; i < 8; i++)
+ 142   1          {
+ 143   2              if (!(ship_alive[i][0]) && !(ship_alive[i][1]))
+ 144   2              {
+ 145   3                  ship_x_coord_limits[0] -= 13; // make sure we move all the way to the left edge
+ 146   3              }
+ 147   2              else
+ 148   2              {
+ 149   3                  break; // we found a leftmost ship so stop checking
+ 150   3              }
+ 151   2          }
+ 152   1      
+ 153   1          // move ships in the current direction one pixel
+ 154   1          // also check if we're at the edge, if so, drop down and reverse direction
+ 155   1          if (ship_direction == 0) // moving right
+ 156   1          {
+ 157   2              ship_ref_coords[0] += 1;
+ 158   2              if (ship_ref_coords[0] >= ship_x_coord_limits[1]) // check right limit
+ 159   2              {
+ 160   3                  ship_ref_coords[0] = ship_x_coord_limits[1]; // reset x-coord to limit
+ 161   3                  ship_ref_coords[1] += 8; // drop down one row
+ 162   3                  ship_direction = 1; // reverse direction
+ 163   3              }
+ 164   2          }
+ 165   1          else // moving left
+ 166   1          {
+ 167   2              ship_ref_coords[0] -= 1;
+ 168   2              if (ship_ref_coords[0] <= ship_x_coord_limits[0]) // check left limit
+ 169   2              {
+ 170   3                  ship_ref_coords[0] = ship_x_coord_limits[0]; // reset x-coord to limit
+ 171   3                  ship_ref_coords[1] += 8; // drop down one row
+ 172   3                  ship_direction = 0; // reverse direction
+ 173   3              }
+ 174   2          }
+ 175   1      
+ 176   1          // see if we have any ships in the bottom row for lower limit calculation
+ 177   1          for (i = 0; i < 8; i++)
+ 178   1              if (ship_alive[i][1])
+ 179   1                  ship_in_bottom_row = 1;
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 4   
+
+ 180   1          // make sure we don't drop below bottom of screen
+ 181   1          if (ship_in_bottom_row)
+ 182   1          {
+ 183   2              if (ship_ref_coords[1] > 48) // ship(s) in bottom row
+ 184   2                  ship_ref_coords[1] = 48;
+ 185   2          }
+ 186   1          else // no ships in bottom row
+ 187   1          {
+ 188   2              if (ship_ref_coords[1] > 56)
+ 189   2                  ship_ref_coords[1] = 56;
+ 190   2          }
+ 191   1      
+ 192   1          // switch ship animation frames each time we move
+ 193   1          ship_frame_num++;
+ 194   1          ship_frame_num &= 0x01; // we use this as an index so restrict values
+ 195   1      
+ 196   1      }
+ 197          
+ 198          
+ 199          void draw_ships(void)
+ 200          {
+ 201   1          unsigned char i = 0;
+ 202   1          unsigned char j = 0;
+ 203   1          unsigned char k = 0;
+ 204   1          int x = 0;
+ 205   1          int y = 0;
+ 206   1          unsigned int cursor = 0;
+ 207   1      
+ 208   1          x = ship_ref_coords[0];
+ 209   1          y = ship_ref_coords[1];
+ 210   1          for (i = 0; i < 2; i++)
+ 211   1          {
+ 212   2              // page*128 + x puts us at reference coords in screen[], i gives ship row num
+ 213   2              cursor = (((y/8)+i)*128) + x;
+ 214   2              for (j = 0; j < 8; j++)
+ 215   2              {
+ 216   3                  // don't try to draw outside ship boundaries or draw nonexistent ships
+ 217   3                  if ((cursor < 128) || (cursor > 895) || !(ship_alive[j][i]))
+ 218   3                  {
+ 219   4                      cursor += 13; // 13 = width of ship + spacing
+ 220   4                      continue;
+ 221   4                  }
+ 222   3                  // draw the current frame of the ship
+ 223   3                  for (k = 0; k < 10; k++) // 10 = width of ship
+ 224   3                  {
+ 225   4                      screen[cursor] = ship_gfx[ship_frame_num][k];
+ 226   4                      cursor++;
+ 227   4                  }
+ 228   3                  // add in spacing between ships
+ 229   3                  for (k = 0; k < 3; k++) // 3 = ship spacing
+ 230   3                  {
+ 231   4                      screen[cursor] = 0x00;
+ 232   4                      cursor++;
+ 233   4                  }
+ 234   3              }
+ 235   2          }
+ 236   1      }
+ 237          
+ 238          
+ 239          void calculate_shots_position(void)
+ 240          {
+ 241   1          unsigned char i = 0;
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 5   
+
+ 242   1          unsigned char j = 0;
+ 243   1          unsigned char k = 0;
+ 244   1          unsigned char rand_num = 0;
+ 245   1          unsigned char ship_num = 0;
+ 246   1          unsigned char num_ships_remaining = 0;
+ 247   1      
+ 248   1          // move the cannon shots one pixel
+ 249   1          for (i = 0; i < 4; i++)
+ 250   1          {
+ 251   2              if (cannon_shot_coords[i][0] != -1) // only update active shots
+ 252   2              {
+ 253   3                  cannon_shot_coords[i][1] -= 1;  // move up one pixel
+ 254   3                  if (cannon_shot_coords[i][1] < 8)
+ 255   3                  {
+ 256   4                      cannon_shot_coords[i][0] = -1; // clear shot if we went past top boundary
+ 257   4                      cannon_shot_coords[i][1] = -1;
+ 258   4                  }
+ 259   3              }
+ 260   2          }
+ 261   1      
+ 262   1          // move the ship shots one pixel
+ 263   1          for (i = 0; i < 8; i++)
+ 264   1          {
+ 265   2              if (ship_shot_coords[i][0] != -1) // only update active shots
+ 266   2              {
+ 267   3                  ship_shot_coords[i][1] += 1;  // move down one pixel
+ 268   3                  if (ship_shot_coords[i][1] > 63) // see if shot went offscreen
+ 269   3                  {
+ 270   4                      ship_shot_coords[i][0] = -1; // clear shot if we went past top boundary
+ 271   4                      ship_shot_coords[i][1] = -1;
+ 272   4                  }
+ 273   3              }
+ 274   2          }
+ 275   1      
+ 276   1      
+ 277   1          
+ 278   1      
+ 279   1          // decide when and where to place random ship shot
+ 280   1          rand_num = rand() % ship_update_time; // generate a random number based on current speed (difficulty)
+ 281   1          if (rand_num == 0)
+ 282   1          {
+ 283   2              rand_num = (rand() % 16); // pick a ship to fire from
+ 284   2              k = 0;
+ 285   2              i = (rand_num % 8); // 0-7 (column)
+ 286   2              j = (rand_num / 8); // 0-1 (row)
+ 287   2              if(ship_alive[i][j])
+ 288   2              {
+ 289   3                  // place shot coords in first free slot
+ 290   3                  for (k = 0; k < 8; k++)
+ 291   3                  {
+ 292   4                      if (ship_shot_coords[k][0] == -1) // ignore unused shot slots
+ 293   4                      {
+ 294   5                          // set x/y coords of ship shot
+ 295   5                          ship_shot_coords[k][0] = i*13 + ship_ref_coords[0] + 5; // center shot on ship (ship w
+             -idth /2 = 5)
+ 296   5                          ship_shot_coords[k][1] = j*8 + ship_ref_coords[1] + 6; // top/bottom row
+ 297   5                          break; // stored shot, so stop checking for free slots
+ 298   5                      }
+ 299   4                  }
+ 300   3              }
+ 301   2          }
+ 302   1      }
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 6   
+
+ 303          
+ 304          
+ 305          void draw_shots(void)
+ 306          {
+ 307   1          char x = 0;
+ 308   1          char y = 0;
+ 309   1          unsigned char i = 0;
+ 310   1          unsigned char j = 0;
+ 311   1          unsigned char cur_char = 0;
+ 312   1          unsigned char tail_length = ((switch_current & 0x0C) >> 2) + 4; // switches 2 & 3, tail_length of 4-7
+ 313   1      
+ 314   1          // draw shots
+ 315   1          // alien ship shots
+ 316   1          for (i = 0; i < 8; i++)
+ 317   1          {
+ 318   2              if (ship_shot_coords[i][0] == -1) // if -1 then unused shot slot
+ 319   2                  continue;
+ 320   2              
+ 321   2              for (j = 0; j < tail_length; j++) // draw shot and tail after it
+ 322   2              {
+ 323   3                  x = ship_shot_coords[i][0];
+ 324   3                  y = ship_shot_coords[i][1] - j;
+ 325   3                  // calculate char value from coords
+ 326   3                  // page = y_coord / 8
+ 327   3                  // shift_bits = y_coord % 8, bit in char
+ 328   3                  // char = 1 << shift_bits
+ 329   3                  cur_char = 1 << (y % 8);
+ 330   3                  screen[((y/8)*128)+x] |= cur_char;
+ 331   3              }
+ 332   2          }
+ 333   1          // cannon shots
+ 334   1          for (i = 0; i < 4; i++)
+ 335   1          {
+ 336   2              if (cannon_shot_coords[i][0] == -1) // if -1 then unused shot slot
+ 337   2                  continue;
+ 338   2      
+ 339   2              for (j = 0; j < tail_length; j++) // draw shot and tail after it
+ 340   2              {
+ 341   3                  x = cannon_shot_coords[i][0];
+ 342   3                  y = cannon_shot_coords[i][1] + j;
+ 343   3                  // calculate char value from coords
+ 344   3                  // page = y_coord / 8
+ 345   3                  // shift_bits = y_coord % 8, bit in char
+ 346   3                  // char = 1 << shift_bits
+ 347   3                  cur_char = 1 << (y % 8);
+ 348   3                  screen[((y/8)*128)+x] |= cur_char;
+ 349   3              }
+ 350   2          }
+ 351   1      }
+ 352          
+ 353          
+ 354          void initialize_wave(void)
+ 355          {
+ 356   1          unsigned char i = 0;
+ 357   1          unsigned char j = 0;
+ 358   1      
+ 359   1          // set up new wave of ships
+ 360   1          ship_frame_num = 0; // reset animation frame
+ 361   1          ship_direction = 0; // reet wave movement direction
+ 362   1          ship_x_coord_limits[0] = 0; // reset ship x-coord limits (for movement)
+ 363   1          ship_x_coord_limits[1] = 27;
+ 364   1          for (i = 0; i < 8; i++)
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 7   
+
+ 365   1              for (j = 0; j < 2; j++)
+ 366   1                  ship_alive[i][j] = 1; // reset ship alive/dead state
+ 367   1          wave_num++;
+ 368   1          for (i = 0; i < 8; i++)
+ 369   1              for (j = 0; j < 2; j++)
+ 370   1                  ship_shot_coords[i][j] = -1; // clear remaining ship shots from last wave
+ 371   1          for (i = 0; i < 4; i++)
+ 372   1              for (j = 0; j < 2; j++)
+ 373   1                  cannon_shot_coords[i][j] = -1; // clear remaining cannon shots from last wave
+ 374   1          ship_ref_coords[0] = 0; // reset ship wave starting point
+ 375   1          ship_ref_coords[1] = wave_num*8; // new wave is 8 pixels lower than last (first wave at 8)
+ 376   1          if (ship_ref_coords[1] >= 24)
+ 377   1              ship_ref_coords[1] = 24; // but no more than 16 pixels lower than first wave
+ 378   1          if (wave_num < 6) // make sure we don't have a negative time
+ 379   1          {
+ 380   2              ship_update_time = 60 - (wave_num*10); // 50ms starting update delay first wave, 40ms second wave,
+             - etc
+ 381   2          }
+ 382   1          else // just set our lowest wave start update delay
+ 383   1          {
+ 384   2              ship_update_time = 10; // bottom wave start update delay limit is 10ms
+ 385   2          }
+ 386   1      }
+ 387          
+ 388          
+ 389          void check_start_game(void)
+ 390          {
+ 391   1          if (button_current & 0x40)
+ 392   1          {
+ 393   2              // clear button press
+ 394   2              button_current &= 0xBF;
+ 395   2      
+ 396   2              // start game if not already started
+ 397   2              if (game_is_over)
+ 398   2              {
+ 399   3                  game_is_over = 0;
+ 400   3                  initialize_wave();
+ 401   3              }
+ 402   2          }
+ 403   1      }
+ 404          
+ 405          
+ 406          void check_cannon_fired(void)
+ 407          {
+ 408   1          unsigned char i = 0;
+ 409   1      
+ 410   1          // see if we fired the cannon (and game is in progress)
+ 411   1          if ((button_current & 0x80) && (game_is_over == 0))
+ 412   1          {
+ 413   2              // clear button press
+ 414   2              button_current &= 0x7F;
+ 415   2              // place shot coords in first free slot
+ 416   2              for (i = 0; i < 4; i++)
+ 417   2              {
+ 418   3                  if (cannon_shot_coords[i][0] == -1) // ignore unused shot slots
+ 419   3                  {
+ 420   4                      // play cannon fire sound
+ 421   4                      sound_to_play = 2;
+ 422   4                      // set x/y coords of cannon shot
+ 423   4                      cannon_shot_coords[i][0] = cannon_position_avg + cannon_size/2; // center shot on cannon
+ 424   4                      cannon_shot_coords[i][1] = 55; // bottom of page 6
+ 425   4                      break; // stored shot, so stop checking for free slots
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 8   
+
+ 426   4                  }
+ 427   3              }
+ 428   2          }
+ 429   1      }
+ 430          
+ 431          
+ 432          void calculate_hit(void)
+ 433          {
+ 434   1          char x = 0;
+ 435   1          char y = 0;
+ 436   1          unsigned char i = 0;
+ 437   1          unsigned char j = 0;
+ 438   1      
+ 439   1          // check if cannon shot(s) hit ship(s)
+ 440   1          for (i = 0; i < 4; i++)
+ 441   1          {
+ 442   2              if (cannon_shot_coords[i][0] == -1) // if -1 then unused shot slot
+ 443   2                  continue;
+ 444   2              x = cannon_shot_coords[i][0];
+ 445   2              y = cannon_shot_coords[i][1];
+ 446   2              // check if y-coord of shot is in top row of ships
+ 447   2              if ((y >= ship_ref_coords[1]) && (y <= ship_ref_coords[1] + 7))
+ 448   2              {
+ 449   3                  // check x-coord against alive ships
+ 450   3                  for (j = 0; j < 8; j++)
+ 451   3                  {
+ 452   4                      if ((ship_alive[j][0]) && (x >= (ship_ref_coords[0] + j*13)) && (x <= (ship_ref_coords[0] 
+             -+ j*13 + 9)))
+ 453   4                      {
+ 454   5                          // we hit a ship, remove it and the shot that hit it
+ 455   5                          ship_alive[j][0] = 0;
+ 456   5                          cannon_shot_coords[i][0] = -1;
+ 457   5                          cannon_shot_coords[i][1] = -1;
+ 458   5                          score++;
+ 459   5                          if (ship_update_time > 1) // see if we can speed up
+ 460   5                              ship_update_time--; // if so, speed up remaining ships 
+ 461   5                          // play ship hit sound
+ 462   5                          sound_to_play = 1;
+ 463   5                      }
+ 464   4                  }
+ 465   3              }
+ 466   2              // check if y-coord of shot is in bottom row of ships
+ 467   2              else if ((y >= ship_ref_coords[1] + 8) && (y <= ship_ref_coords[1] + 15))
+ 468   2              {
+ 469   3                  // check x-coord against alive ships
+ 470   3                  for (j = 0; j < 8; j++)
+ 471   3                  {
+ 472   4                      if ((ship_alive[j][1]) && (x >= (ship_ref_coords[0] + j*13)) && (x <= (ship_ref_coords[0] 
+             -+ j*13 + 9)))
+ 473   4                      {
+ 474   5                          // we hit a ship, remove it and the shot that hit it
+ 475   5                          ship_alive[j][1] = 0;
+ 476   5                          cannon_shot_coords[i][0] = -1;
+ 477   5                          cannon_shot_coords[i][1] = -1;
+ 478   5                          score++;
+ 479   5                          if (ship_update_time > 1) // see if we can speed up
+ 480   5                              ship_update_time--; // if so, speed up remaining ships
+ 481   5                          // play ship hit sound
+ 482   5                          sound_to_play = 1;
+ 483   5                      }
+ 484   4                  }
+ 485   3              }
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 9   
+
+ 486   2          }
+ 487   1      
+ 488   1          // check if ship shot(s) hit cannon
+ 489   1          for (i = 0; i < 8; i++)
+ 490   1          {
+ 491   2              if (ship_shot_coords[i][0] == -1) // if -1 then unused shot slot
+ 492   2                  continue;
+ 493   2              x = ship_shot_coords[i][0];
+ 494   2              y = ship_shot_coords[i][1];
+ 495   2              // check if coords of shot is within current cannon area (page 7 and cannon position/size)
+ 496   2              if ((y >= 56) && (x >= cannon_position_avg) && (x <= (cannon_position_avg + cannon_size)))
+ 497   2              {
+ 498   3                  // we hit the cannon
+ 499   3                  // play cannon hit sound
+ 500   3                  sound_to_play = 3;
+ 501   3                  // reset wave
+ 502   3                  lives--;
+ 503   3                  wave_num--;
+ 504   3                  initialize_wave();
+ 505   3              }
+ 506   2          }
+ 507   1      }
+ 508          
+ 509          
+ 510          void game_over(void)
+ 511          {
+ 512   1          unsigned char i = 0;
+ 513   1          unsigned char j = 0;
+ 514   1          unsigned char cur_char = 0;
+ 515   1          int cursor = 0;
+ 516   1      
+ 517   1          // stop updates
+ 518   1          game_is_over = 1;
+ 519   1      
+ 520   1          // print game over text
+ 521   1          blank_screen();
+ 522   1          cursor = 416;
+ 523   1          for (i = 0; i < strlen(game_over_str); i++)
+ 524   1          {
+ 525   2              cur_char = game_over_str[i];
+ 526   2              if (cur_char < 0x20)
+ 527   2                  continue; // skip invalid characters
+ 528   2              cur_char -= 0x20; // align ascii value with our font array
+ 529   2              for (j = 0; j < 5; j++) // handle each column in character
+ 530   2              {
+ 531   3                  screen[cursor] = font5x8[cur_char*5+j];
+ 532   3                  cursor++;
+ 533   3              }
+ 534   2              screen[cursor] = 0x00; // kerning gap
+ 535   2              cursor++;
+ 536   2          }
+ 537   1      
+ 538   1          // set up for new game
+ 539   1          wave_num = 0;
+ 540   1          lives = 3;
+ 541   1          score = 0;
+ 542   1      }
+ 543          
+ 544          
+ 545          void check_status(void)
+ 546          {
+ 547   1          unsigned char i = 0;
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 10  
+
+ 548   1          unsigned char j = 0;
+ 549   1          unsigned char num_ships_remaining = 0;
+ 550   1          unsigned char ship_in_bottom_row = 0;
+ 551   1      
+ 552   1          // check alive ships
+ 553   1          for (i = 0; i < 8; i++)
+ 554   1              for (j = 0; j < 2; j++)
+ 555   1                  if(ship_alive[i][j])
+ 556   1                      num_ships_remaining++;
+ 557   1          // and set up next wave if cleared
+ 558   1          if (num_ships_remaining == 0)
+ 559   1          {
+ 560   2              initialize_wave();
+ 561   2          }
+ 562   1      
+ 563   1          // see if we have any ships in the bottom row
+ 564   1          for (i = 0; i < 8; i++)
+ 565   1              if (ship_alive[i][1])
+ 566   1                  ship_in_bottom_row = 1;
+ 567   1          // check if ships ran into cannon
+ 568   1          if ((ship_in_bottom_row && (ship_ref_coords[1] > 47)) || (ship_ref_coords[1] > 55))
+ 569   1          {
+ 570   2              // play cannon hit sound
+ 571   2              sound_to_play = 3;
+ 572   2              // and remove life and reset wave
+ 573   2              lives--;
+ 574   2              wave_num--;
+ 575   2              initialize_wave();
+ 576   2          }
+ 577   1      
+ 578   1          // check if lives=0 and do game over tasks if so
+ 579   1          if (lives == 0)
+ 580   1          {
+ 581   2              game_over();
+ 582   2          }
+ 583   1      }
+ 584          
+ 585          
+ 586          void set_dac_value(void)
+ 587          {
+ 588   1          unsigned int sound_data = 0;
+ 589   1          
+ 590   1          // sounds are only 2048 long, if we went that far we finished playing it
+ 591   1          if (sound_index > 2047)
+ 592   1          {
+ 593   2              sound_index = 0; // reset sound data index
+ 594   2              sound_in_progress = 0; // clear sound in progress
+ 595   2              // make sure DAC output is 0 (silence) if we're done with playback
+ 596   2              DAC0L = 0;
+ 597   2              DAC0H = 0; // write is latched on DAC0H write so write last
+ 598   2          }
+ 599   1          if (sound_in_progress)
+ 600   1          {
+ 601   2              switch (sound_in_progress) // determine which sound we're playing
+ 602   2              {
+ 603   3                  case 1:
+ 604   3                      sound_data = ship_death_snd[sound_index];
+ 605   3                      break;
+ 606   3                  case 2:
+ 607   3                      sound_data = cannon_fire_snd[sound_index];
+ 608   3                      break;
+ 609   3                  case 3:
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 11  
+
+ 610   3                      sound_data = cannon_death_snd[sound_index];
+ 611   3                      break;
+ 612   3                  default: // unknown sound requested
+ 613   3                      sound_data = 0x000;
+ 614   3                      break;
+ 615   3              }
+ 616   2              // put the sound data into the DAC registers
+ 617   2              DAC0L = sound_data;
+ 618   2              DAC0H = sound_data >> 8; // write is latched on DAC0H write so write last
+ 619   2              sound_index++; // next loop will play next part of sound
+ 620   2          }
+ 621   1          else if (sound_to_play) // no sound in progress, see if there's one queued
+ 622   1          {
+ 623   2              sound_in_progress = sound_to_play; // start playback of queued sound
+ 624   2              sound_to_play = 0; // clear queued sound
+ 625   2          }      
+ 626   1      }
+ 627          
+ 628          
+ 629          void get_adc0_value(void)
+ 630          {
+ 631   1          unsigned int position_temp = 0;
+ 632   1          unsigned int i = 0;
+ 633   1          unsigned long position_sum = 0;
+ 634   1      
+ 635   1          // get ADC0 value and insert into array
+ 636   1          while (!adc0int); // wait for ADC0 to finish conversion
+ 637   1          adc0int = 0;
+ 638   1          position_temp = ADC0H;
+ 639   1          position_temp = (position_temp << 8);
+ 640   1          position_temp = position_temp | ADC0L;
+ 641   1      
+ 642   1          // read from ADC and store in the correct spot
+ 643   1          cannon_position[cannon_position_index] = position_temp;
+ 644   1          cannon_position_index++;
+ 645   1          if (cannon_position_index > 31)
+ 646   1              cannon_position_index = 0;
+ 647   1      
+ 648   1          // if we have enough values then calculate the current average
+ 649   1          if (cannon_position_index == 0)
+ 650   1          {
+ 651   2              position_sum = 0;
+ 652   2              for (i = 0; i < 32; i++)
+ 653   2                  position_sum += cannon_position[i]; // sum the adc samples
+ 654   2              cannon_position_avg = position_sum/32; // calculate the average
+ 655   2              cannon_position_avg = cannon_position_avg/32; // scale to 0-127
+ 656   2              if (cannon_position_avg > (127 - cannon_size)) // make sure we can fit on screen
+ 657   2                  cannon_position_avg = 127 - cannon_size;
+ 658   2          }
+ 659   1      }
+ 660          
+ 661          
+ 662          void check_buttons(void)
+ 663          {
+ 664   1          unsigned char button_state = 0;
+ 665   1      
+ 666   1          // read buttons
+ 667   1          button_state = ~P5; // set 1's where button pressed
+ 668   1          button_state &= 0xC0; // isolate the button bits
+ 669   1          button_current = button_state ^ button_last; // only get changed states
+ 670   1          button_current &= button_state; // only get presses
+ 671   1          button_last = button_state; // save current state for next check 
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 12  
+
+ 672   1      
+ 673   1          // get DIP switch settings
+ 674   1          switch_current = ~P5;
+ 675   1          switch_current &= 0x0F; // isolate switch bits
+ 676   1      }
+ 677          
+ 678          
+ 679          void timer0(void) interrupt 1 // 10ms
+ 680          {
+ 681   1          TF0 = 0; // reset timer 0 overflow flag
+ 682   1      
+ 683   1          check_buttons();
+ 684   1          check_start_game();
+ 685   1      
+ 686   1          if (game_is_over == 0) // only clear and update screen if we started game
+ 687   1          {
+ 688   2              // clear old data
+ 689   2              blank_screen();
+ 690   2      
+ 691   2              // draw the various parts of the screen
+ 692   2              draw_strings(); // page 0
+ 693   2              draw_ships(); // pages 1-6
+ 694   2              draw_cannon(); // page 7
+ 695   2              draw_shots(); // pages 1-7
+ 696   2          }
+ 697   1          
+ 698   1          // display our new data
+ 699   1          refresh_screen();
+ 700   1      }
+ 701          
+ 702          
+ 703          void timer1(void) interrupt 3 // 1ms
+ 704          {
+ 705   1          TF1 = 0; // reset timer 1 overflow flag
+ 706   1      
+ 707   1          if (game_is_over == 0) // don't run tasks if in "game over" state
+ 708   1          {
+ 709   2              check_cannon_fired();
+ 710   2              ship_update_counter++;
+ 711   2              if (ship_update_counter > ship_update_time)
+ 712   2              {
+ 713   3                  ship_update_counter = 0;
+ 714   3                  calculate_ships_position();
+ 715   3              }
+ 716   2              calculate_shots_position();
+ 717   2              calculate_hit();
+ 718   2              check_status();
+ 719   2          }
+ 720   1      }
+ 721          
+ 722          
+ 723          void timer2(void) interrupt 5 // 100us
+ 724          {
+ 725   1          TF2 = 0; // reset timer 2 overflow flag
+ 726   1      
+ 727   1          get_adc0_value();
+ 728   1          set_dac_value();
+ 729   1      }
+ 730          
+ 731          
+ 732          void main(void) 
+ 733          {
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 13  
+
+ 734   1          unsigned char i = 0;
+ 735   1          unsigned char j = 0;
+ 736   1          unsigned char cur_char = 0;
+ 737   1          int cursor = 0;
+ 738   1      
+ 739   1          WDTCN = 0xDE;   // disable watchdog
+ 740   1          WDTCN = 0xAD;
+ 741   1          XBR2 = 0x40;    // enable port output
+ 742   1          OSCXCN = 0x67;  // turn on external crystal
+ 743   1          TMOD = 0x22;    // wait 1ms using T1 mode 2
+ 744   1          TH1 = -167;     // 22MHz clock, 167 counts - 1ms
+ 745   1          TR1 = 1;
+ 746   1          while ( TF1 == 0 ) { }          // wait 1ms
+ 747   1          while ( !(OSCXCN & 0x80) ) { }  // wait till oscillator stable
+ 748   1          OSCICN = 8;     // switch over to 22.1184MHz
+ 749   1          TMOD = 0x11;    // configure for 16-bit timer operation
+ 750   1          TH0 = -18432 >> 8;     // 22MHz clock, 18432 counts - 10ms
+ 751   1          TL0 = -18432;
+ 752   1          TR0 = 1;        // start timer 0
+ 753   1          TH1 = -1843 >> 8;     // 22MHz clock, 1843 counts - 1ms
+ 754   1          TL1 = -1843;
+ 755   1          TR1 = 1;        // start timer 1
+ 756   1          T2CON = 0x00; // timer 2 16-bit auto-reload mode
+ 757   1          RCAP2H = -184 >> 8; // 22MHz clock, /12, 184 counts - 100us
+ 758   1          RCAP2L = -184;
+ 759   1          REF0CN = 0x03;  // set ADC0 reference to 2.4V
+ 760   1          AMX0CF = 0x00;  // all inputs are single-ended for ADC0
+ 761   1          AMX0SL = 0x00;  // change ADC0 register to external analog (potentiometer)
+ 762   1          ADC0CF = 0x40;  // change gain to 1 (last three bits)
+ 763   1          ADC0CN = 0x8C;  // enable ADC0, enable tracking mode and set trigger to timer 2 overflow
+ 764   1              DAC0CN = 0x80;  // DAC update on DAC0H write, right justified
+ 765   1          TR2 = 1; // start timer 2
+ 766   1      
+ 767   1      
+ 768   1          // enable interrupts
+ 769   1          IE = 0xAA;
+ 770   1      
+ 771   1          // set up and clear lcd
+ 772   1          init_lcd();
+ 773   1          blank_screen();
+ 774   1      
+ 775   1          // put game into "new game" state
+ 776   1          game_is_over = 1;
+ 777   1          wave_num = 0;
+ 778   1          lives = 3;
+ 779   1          score = 0;
+ 780   1      
+ 781   1          // print intro text
+ 782   1          cursor = 410;
+ 783   1          for (i = 0; i < strlen(intro_str); i++)
+ 784   1          {
+ 785   2              cur_char = intro_str[i];
+ 786   2              if (cur_char < 0x20)
+ 787   2                  continue; // skip invalid characters
+ 788   2              cur_char -= 0x20; // align ascii value with our font array
+ 789   2              for (j = 0; j < 5; j++) // handle each column in character
+ 790   2              {
+ 791   3                  screen[cursor] = font5x8[cur_char*5+j];
+ 792   3                  cursor++;
+ 793   3              }
+ 794   2              screen[cursor] = 0x00; // kerning gap
+ 795   2              cursor++;
+C51 COMPILER V9.59.0.0   INVADERS                                                          03/09/2021 21:50:42 PAGE 14  
+
+ 796   2          }
+ 797   1      
+ 798   1          // show screen data
+ 799   1          refresh_screen();
+ 800   1      
+ 801   1          if (first_run)
+ 802   1              {
+ 803   2                      first_run = 0x00;
+ 804   2                      srand((TH2 << 8) | TL2); // seed rand() for better psuedorandomness
+ 805   2              }
+ 806   1      
+ 807   1          // go into event-driven mode
+ 808   1          while ( 1 )
+ 809   1          {
+ 810   2              // do nothing, wait for interrupt
+ 811   2          }
+ 812   1      
+ 813   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   4192    ----
+   CONSTANT SIZE    =     47    ----
+   XDATA SIZE       =    145    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     20      37
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

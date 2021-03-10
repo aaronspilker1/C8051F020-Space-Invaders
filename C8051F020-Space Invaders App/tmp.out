@@ -1,0 +1,27 @@
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0 - SN: K1FPC-W0D13Z
+COPYRIGHT ARM Germany GmbH 1987 - 2017
+"F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\graphics.obj",
+"F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\invaders.obj",
+"F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\lcd.obj",
+"F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\sound.obj"  TO "F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\Invaders" RS(256) PL(68) PW(78) 
+
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  CANNON_GFX
+    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\invaders.obj (INVADERS)
+
+>> 
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  CANNON_GFX
+    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\invaders.obj (INVADERS)
+
+>>     ADDRESS: 44C8H
+
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  CANNON_GFX
+    MODULE:  F:\Git Repo's\C8051F020-Space Invaders\C8051F020-Space Invaders App\invaders.obj (INVADERS)
+
+>>     ADDRESS: 44CDH
+
+Program Size: data=56.0 xdata=1169 code=18100
+LINK/LOCATE RUN COMPLETE.  3 WARNING(S),  0 ERROR(S)

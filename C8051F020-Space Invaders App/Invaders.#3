@@ -1,0 +1,290 @@
+#include <C8051F020.h>
+#include <string.h>
+#include <lcd.h>
+#include <sound.h>
+#include <graphics.h>
+
+
+char score_str[] = "Score: 0000";
+char lives_str[] = "  Lives: 0";
+xdata unsigned char ship_lines[6][128] = {0};
+xdata char ship_shot_coords[8][2] = {-1};
+xdata char cannon_shot_coords[4][2] = {-1};
+unsigned int score = 1234;
+unsigned char lives = 5;
+unsigned int position_avg = 0;
+xdata unsigned int position[256] = {0};
+unsigned char position_index = 0;
+char timer0_counter = 0;
+char button_last = 0;
+char button_current = 0;
+char switch_current = 0;
+sbit adc0int = ADC0CN^5;
+
+
+void update_lcd(void)
+{
+	int cursor = 0;
+	int i = 0;
+	int j = 0;
+    int x = 0;
+    int y = 0;
+	char cur_char;
+
+	// setup score string with updated values and add to screen data
+	score_str[7] = ((score % 10000) / 1000) + 0x30; // 1000's digit to char
+	score_str[8] = ((score % 1000) / 100) + 0x30; // 100's digit to char
+	score_str[9] = ((score % 100) / 10) + 0x30; // 10's digit to char
+	score_str[10] = (score % 10) + 0x30; // 1's digit to char
+	for (i = 0; i < strlen(score_str); i++) // display score string
+	{
+		cur_char = score_str[i];
+		if (cur_char < 0x20)
+			continue; // skip invalid characters
+			cur_char -= 0x20; // align ascii value with our font array
+		for (j = 0; j < 5; j++) // handle each column in character
+		{
+			screen[cursor] = font5x8[cur_char*5+j];
+			cursor++;
+		}
+		screen[cursor] = 0x00; // kerning gap
+		cursor++;
+	}
+
+	// setup lives string with updated values and add to screen data
+	lives_str[9] = (lives % 10) + 0x30; // 1's digit to char
+	for (i = 0; i < strlen(lives_str); i++) // display lives string
+	{
+		cur_char = lives_str[i];
+		if (cur_char < 0x20)
+			continue; // skip invalid characters
+			cur_char -= 0x20; // align ascii value with our font array
+		for (j = 0; j < 5; j++) // handle each column in character
+		{
+			screen[cursor] = font5x8[cur_char*5+j];
+			cursor++;
+		}
+		screen[cursor] = 0x00; // kerning gap
+		cursor++;
+	}
+
+    // draw ships
+    for (i = 0; i < 5; i++)
+        for (j = 0; j < 127; j++)
+            screen[(i+1)*128+j] = ship_lines[i][j];
+
+    // draw shots   // TODO draw tails on shots
+    // alien ship shots
+    for (i = 0; i < 7; i++)
+    {
+        if (ship_shot_coords[i][0] != -1) // if not -1 then draw the shot
+        {
+            x = ship_shot_coords[i][0];
+            y = ship_shot_coords[i][1];
+            // calculate char value from coords
+            // page = y_coord / 8
+            // shift_bits = 7 - (y_coord % 8), bit in char
+            // char = 1 << shift_bits
+            cur_char = 1 << (7 - (y % 8));
+            screen[((y/8)*128)+x] |= cur_char;
+        }
+    }
+    // cannon shots
+    for (i = 0; i < 7; i++)
+    {
+        if (cannon_shot_coords[i][0] != -1) // if not -1 then draw the shot
+        {
+            x = cannon_shot_coords[i][0];
+            y = cannon_shot_coords[i][1];
+            // calculate char value from coords
+            // page = y_coord / 8
+            // shift_bits = 7 - (y_coord % 8), bit in char
+            // char = 1 << shift_bits
+            cur_char = 1 << (7 - (y % 8));
+            screen[((y/8)*128)+x] |= cur_char;
+        }
+    }
+    
+	// display our new data
+	refresh_screen();
+}
+
+
+void initialize_wave(void)
+{
+    //
+}
+
+
+void calculate_cannon_position(void)
+{
+    char i = 0;
+    char size = 0;
+    switch (switch_current & 0x03)
+    {
+        case 3:
+            size = 13;
+            if (position_avg > (127 - size)) // make sure we can fit on screen
+                position_avg = 127 - size;
+            for (i = 0; i < (size - 1); i++)
+                screen[896+position_avg+i] = cannon_gfx13[i]; // 896 = page 7
+            break;
+        case 2:
+            size = 11;
+            if (position_avg > (127 - size)) // make sure we can fit on screen
+                position_avg = 127 - size;
+            for (i = 0; i < (size - 1); i++)
+                screen[896+position_avg+i] = cannon_gfx11[i]; // 896 = page 7
+            break;
+        case 1:
+            size = 9;
+            if (position_avg > (127 - size)) // make sure we can fit on screen
+                position_avg = 127 - size;
+            for (i = 0; i < (size - 1); i++)
+                screen[896+position_avg+i] = cannon_gfx9[i]; // 896 = page 7
+            break;
+        case 0:
+        default:
+            size = 7;
+            if (position_avg > (127 - size)) // make sure we can fit on screen
+                position_avg = 127 - size;
+            for (i = 0; i < (size - 1); i++)
+                screen[896+position_avg+i] = cannon_gfx7[i]; // 896 = page 7
+            break;
+    }
+}
+
+
+void calculate_ships_position(void)
+{
+    //
+}
+
+
+void calculate_shots_position(void)
+{
+    //
+}
+
+
+void set_dac_value(void)
+{
+    //
+}
+
+
+void get_adc0_value(void)
+{
+    unsigned int position_temp = 0;
+    unsigned int i = 0;
+    unsigned long position_sum = 0;
+
+    // get ADC0 value and insert into array
+    while (!adc0int); // wait for ADC0 to finish conversion
+    adc0int = 0;
+    position_temp = ADC0H;
+    position_temp = (position_temp << 8);
+    position_temp = position_temp | ADC0L;
+
+    // read from ADC and store in the correct spot
+    position[position_index] = position_temp;
+    position_index++;
+
+    // if we have 256 values then calculate the current average
+    if (position_index == 0)
+    {
+        position_sum = 0;
+        for (i = 0; i < 256; i++)
+            position_sum += position[i];
+        position_avg = position_sum/256;
+        position_avg = position_avg/32; // scale to 0-127
+    }
+}
+
+
+void timer0(void) interrupt 1 // button debouncing
+{
+    char button_state = 0;
+    // 10ms, need a counter to 72 along with timer settings to get 10ms
+    timer0_counter++;
+    if (timer0_counter > 71)
+    {
+        timer0_counter = 0;
+
+        // read buttons
+        button_state = ~P5; // set 1's where button pressed
+        button_state &= 0xC0; // isolate the button bits
+        button_current = button_state ^ button_last; // only get changed states
+        button_current &= button_state; // only get (new) presses
+        button_last = button_state; // save current state for next check 
+    }
+}
+
+
+void timer1(void) interrupt 3 // position calculations, update lcd
+{
+    // 1ms
+
+    calculate_cannon_position();
+    calculate_ships_position();
+    calculate_shots_position();
+
+    update_lcd();
+}
+
+
+void timer2(void) interrupt 5 // sample knob position, output sound
+{
+    // 100us
+    // reset timer 2 overflow flag
+    TF2 = 0;
+
+    get_adc0_value();
+
+    set_dac_value();
+}
+
+
+void main(void) 
+{
+    WDTCN = 0xDE;   // disable watchdog
+    WDTCN = 0xAD;
+    XBR2 = 0x40;    // enable port output
+    OSCXCN = 0x67;  // turn on external crystal
+    TMOD = 0x22;    // wait 1ms using T1 mode 2
+    TH1 = -167;     // 22MHz clock, 167 counts - 1ms
+    TR1 = 1;
+    while ( TF1 == 0 ) { }          // wait 1ms
+    while ( !(OSCXCN & 0x80) ) { }  // wait till oscillator stable
+    OSCICN = 8;     // switch over to 22.1184MHz
+    TMOD = 0x22;    // wait 1ms using T1 mode 2
+    TH1 = -167;     // 22MHz clock, 167 counts - 1ms
+    TR1 = 1;        // start timer 1
+    TH0 = 0;        // 10 ms (sysclk / (12*100*256*72))
+    TR0 = 1;
+    RCAP2H = -2212 >> 8; // set timer 2 for 1024*2 samples/sec delay
+    RCAP2L = -2212;
+    REF0CN = 0x07;  // set ADC0 reference to 2.4V and enable temp sensor
+    AMX0CF = 0x00;  // all inputs are single-ended for ADC0
+    AMX0SL = 0x00;  // change ADC0 register to external analog (potentiometer)
+    ADC0CF = 0x40;  // change gain to 1 (last three bits)
+    ADC0CN = 0x8C;  // enable ADC0, enable tracking mode and set trigger to timer 2 overflow
+    TR2 = 1; // start timer 2
+
+
+    // init done, enable interrupts and go into event-driven mode
+    IE = 0xAA;
+
+    init_lcd();
+    blank_screen();
+
+    // get DIP switch settings
+    switch_current = ~P5;
+    switch_current &= 0x1F; // isolate switch bits
+
+    while ( 1 )
+    {
+        // do nothing, wait for interrupt
+    }
+
+}

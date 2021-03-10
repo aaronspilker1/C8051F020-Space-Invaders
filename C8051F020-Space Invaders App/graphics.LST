@@ -1,0 +1,46 @@
+C51 COMPILER V9.59.0.0   GRAPHICS                                                          03/09/2021 21:45:24 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE GRAPHICS
+OBJECT MODULE PLACED IN graphics.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.exe graphics.c DB OE BR INCDIR(c:\SiLabs\MCU\Inc)
+
+line level    source
+
+   1          
+   2          // this file contains data needed for drawing the ships and cannon
+   3          // TODO change cannon to 13x4 array for cleaner code in program
+   4          
+   5          code unsigned char     ship_gfx[10] = {0x20, 0x11, 0x1E, 0x2A,
+   6                                                 0x0E, 0x0E, 0x2A, 0x1E,
+   7                                                 0x11, 0x20};
+   8          
+   9          code unsigned char   cannon_gfx7[7] = {0x70, 0x78, 0x7E, 0x7E, 
+  10                                                 0x7E, 0x78, 0x70};
+  11          
+  12          code unsigned char   cannon_gfx9[9] = {0x70, 0x70, 0x78, 0x7E,
+  13                                                 0x7E, 0x7E, 0x78, 0x70,
+  14                                                 0x70};
+  15          
+  16          code unsigned char cannon_gfx11[11] = {0x70, 0x70, 0x70, 0x78,
+  17                                                 0x7E, 0x7E, 0x7E, 0x78,
+  18                                                 0x70, 0x70, 0x70};
+  19          
+  20          code unsigned char cannon_gfx13[13] = {0x70, 0x70, 0x70, 0x70,
+  21                                                 0x78, 0x7E, 0x7E, 0x7E,
+  22                                                 0x78, 0x70, 0x70, 0x70,
+  23                                                 0x70};
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =     50    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
